@@ -2,7 +2,7 @@
 
 Hi everyone,
 
-This repository is a part of the effort to understand various ways in which Reinforcement Learning can be used in finance domain.
+This repository is a part of the effort to understand various ways in which Reinforcement Learning can be used in the finance domain.
 This will mostly contain assignments from the Stanford CME 241 course.
 See http://web.stanford.edu/class/cme241/
 
