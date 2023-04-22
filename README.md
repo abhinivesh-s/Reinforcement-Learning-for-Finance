@@ -8,4 +8,4 @@ See http://web.stanford.edu/class/cme241/
 
 Most of the assignments need the framework from this Git Repo: https://github.com/TikhonJelvis/RL-book
 
-We will also follow the the accompanying book for the course: https://stanford.edu/~ashlearn/RLForFinanceBook/book.pdf
+We will also follow the accompanying book for the course: https://stanford.edu/~ashlearn/RLForFinanceBook/book.pdf
