@@ -3,31 +3,44 @@ import pandas as pd
 
 # Initialize Spark Session
 spark = SparkSession.builder \
-    .appName("Read Parquet Iteratively to Pandas") \
+    .appName("Recursive Parquet Read") \
     .getOrCreate()
 
-# HDFS path
+# HDFS root folder
 hdfs_folder = "hdfs:///path/to/hdfs/folder"
 
-# Access Hadoop FileSystem
+# Initialize Hadoop FileSystem
 hadoop_conf = spark._jsc.hadoopConfiguration()
 fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(hadoop_conf)
-path = spark._jvm.org.apache.hadoop.fs.Path(hdfs_folder)
-file_status = fs.listStatus(path)
+Path = spark._jvm.org.apache.hadoop.fs.Path
 
-# Collect all individual Pandas DataFrames
+# Recursive function to find all parquet file paths
+def list_parquet_files(path):
+    parquet_files = []
+    file_status = fs.listStatus(Path(path))
+    
+    for status in file_status:
+        p = status.getPath()
+        if status.isDirectory():
+            parquet_files.extend(list_parquet_files(p.toString()))
+        elif p.getName().endswith(".parquet"):
+            parquet_files.append(p.toString())
+    
+    return parquet_files
+
+# Get all parquet file paths recursively
+all_parquet_files = list_parquet_files(hdfs_folder)
+
+# Read and concatenate all into one big pandas DataFrame
 pandas_dfs = []
+for file_path in all_parquet_files:
+    print(f"Reading: {file_path}")
+    spark_df = spark.read.parquet(file_path)
+    pandas_df = spark_df.toPandas()
+    pandas_dfs.append(pandas_df)
 
-for status in file_status:
-    file_path = status.getPath().toString()
-    if file_path.endswith(".parquet"):
-        print(f"Reading: {file_path}")
-        spark_df = spark.read.parquet(file_path)
-        pandas_df = spark_df.toPandas()
-        pandas_dfs.append(pandas_df)
-
-# Concatenate into one big DataFrame
+# Concatenate all into one DataFrame
 final_df = pd.concat(pandas_dfs, ignore_index=True)
 
-# Done: final_df is your full pandas dataframe
+# Done
 print(final_df.shape)
